@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GSIX Mini App Test</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      padding: 16px;
+      background: var(--tg-theme-bg-color, #1a1a1a);
+      color: var(--tg-theme-text-color, #fff);
+      margin: 0;
+    }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    h2 { font-size: 14px; margin: 16px 0 6px; opacity: 0.7; }
+    pre {
+      background: rgba(255,255,255,0.05);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 11px;
+      word-break: break-all;
+      white-space: pre-wrap;
+      margin: 0;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      margin-top: 12px;
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #fff);
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>GSIX Mini App — Test Page</h1>
+  
+  <h2>initData (raw):</h2>
+  <pre id="raw">loading...</pre>
+  <button onclick="copyInitData()">Скопировать initData</button>
+
+  <h2>user (parsed):</h2>
+  <pre id="user">loading...</pre>
+
+  <h2>auth_date (parsed):</h2>
+  <pre id="auth_date">loading...</pre>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    
+    if (!tg) {
+      document.getElementById('raw').textContent = 
+        '(Telegram WebApp SDK не загрузился)';
+    } else {
+      tg.ready();
+      tg.expand();
+      
+      const raw = tg.initData;
+      const user = tg.initDataUnsafe?.user;
+      const authDate = tg.initDataUnsafe?.auth_date;
+
+      document.getElementById('raw').textContent = 
+        raw || '(пусто — открой через бота в мобильном Telegram)';
+      document.getElementById('user').textContent = 
+        user ? JSON.stringify(user, null, 2) : '(нет)';
+      document.getElementById('auth_date').textContent = 
+        authDate 
+          ? `${authDate}  (${new Date(authDate * 1000).toISOString()})` 
+          : '(нет)';
+    }
+
+    async function copyInitData() {
+      const raw = window.Telegram?.WebApp?.initData;
+      if (!raw) return;
+      try {
+        await navigator.clipboard.writeText(raw);
+        alert('Скопировано');
+      } catch (e) {
+        // Fallback для старых браузеров.
+        const ta = document.createElement('textarea');
+        ta.value = raw;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert('Скопировано (fallback)');
+      }
+    }
+  </script>
+</body>
+</html>
